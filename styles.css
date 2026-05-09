@@ -1,4 +1,5 @@
 @import url("https://fonts.googleapis.com/css2?family=Hanken+Grotesk:wght@300;400;500;600;700&display=swap");
+@import url("https://fonts.googleapis.com/css2?family=Hedvig+Letters+Serif&display=swap");
 
 :root {
   --bg: #f5f1e8;
@@ -81,11 +82,18 @@ a {
   align-items: stretch;
 }
 
+.main-home {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  min-height: 0;
+}
+
 .home-hero {
-  padding: 28px 0 36px;
-  display: grid;
-  gap: 0;
-  max-width: 640px;
+  padding: 24px 0 32px;
+  width: 100%;
+  max-width: 420px;
   margin: 0 auto;
 }
 
@@ -103,11 +111,22 @@ a {
   animation: panelGlow 7s ease-in-out infinite;
 }
 
+.hero-panel--minimal {
+  background: transparent;
+  border: none;
+  box-shadow: none;
+  animation: none;
+}
+
 .hero-panel::before {
   content: "";
   position: absolute;
   inset: 0;
   background: linear-gradient(to bottom, rgba(255, 250, 240, 0.9), rgba(255, 250, 240, 0.84));
+}
+
+.hero-panel--minimal.hero-panel::before {
+  display: none;
 }
 
 .hero-panel > * {
@@ -125,11 +144,26 @@ a {
   animation: floatY 3.8s ease-in-out infinite;
 }
 
+.app-icon--static {
+  animation: none;
+}
+
 .home-logo {
   height: 34px;
   width: auto;
   display: block;
-  margin: 0 auto 12px;
+  margin: 0 auto 16px;
+}
+
+.sprouting-soon {
+  margin: 0;
+  color: #233332;
+  text-align: center;
+  font-family: "Hedvig Letters Serif", Georgia, "Times New Roman", serif;
+  font-size: 28px;
+  font-style: normal;
+  font-weight: 400;
+  line-height: 36.669px;
 }
 
 .launch-line {
@@ -410,12 +444,12 @@ footer {
 .sections { grid-template-columns: 1fr; }
 
 @media (min-width: 768px) {
-  .home-hero {
-    max-width: 860px;
+  .hero-panel:not(.hero-panel--minimal) {
+    padding: 30px 30px 34px;
   }
 
-  .hero-panel {
-    padding: 30px 30px 34px;
+  .hero-panel--minimal {
+    padding: 36px 32px 40px;
   }
 
   .store-badges {
@@ -437,13 +471,6 @@ footer {
 }
 
 @media (min-width: 1024px) {
-  .home-hero {
-    max-width: 1080px;
-    grid-template-columns: 1.05fr 0.95fr;
-    gap: 18px;
-    align-items: stretch;
-  }
-
   .single-visual {
     margin-bottom: 0;
     height: 100%;
@@ -452,13 +479,6 @@ footer {
   .single-visual img {
     height: 100%;
     object-fit: cover;
-  }
-
-  .hero-panel {
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
-    min-height: 100%;
   }
 
   .content-page {
