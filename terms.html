@@ -1,0 +1,44 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="description" content="Terms of Service for Solgram World.">
+    <title>Terms of Service | Solgram World</title>
+    <link rel="stylesheet" href="styles.css">
+  </head>
+  <body>
+    <div class="page">
+      <main class="container content-page">
+        <section class="paper">
+          <div class="eyebrow">Legal</div>
+          <h1>Terms of Service</h1>
+          <pre class="policy-text" id="policy-content">Loading terms...</pre>
+        </section>
+      </main>
+
+      <footer>
+        <div class="container footer-inner">
+          <small>&copy; 2026 Solgram. All rights reserved.</small>
+          <nav class="footer-links" aria-label="Footer links">
+            <a href="index.html">Home</a>
+            <a href="terms.html">Terms of Service</a>
+            <a href="privacy.html">Privacy Policy</a>
+            <a href="contact.html">Contact Us</a>
+          </nav>
+        </div>
+      </footer>
+    </div>
+    <script>
+      fetch('terms_of_service.txt')
+        .then(function (response) { return response.text(); })
+        .then(function (text) {
+          document.getElementById('policy-content').textContent = text;
+        })
+        .catch(function () {
+          document.getElementById('policy-content').textContent =
+            'Unable to load terms file. Please open terms_of_service.txt directly.';
+        });
+    </script>
+  </body>
+</html>

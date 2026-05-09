@@ -1,0 +1,4 @@
+Solgram Terms of Service
+
+This public legal endpoint is paired with the approved source file `terms_of_service.txt`.
+Please use `terms_of_service.txt` as the canonical editable legal source in this repository.

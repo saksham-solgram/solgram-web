@@ -1,0 +1,4 @@
+Solgram Privacy Policy
+
+This public legal endpoint is paired with the approved source file `privacy_policy.txt`.
+Please use `privacy_policy.txt` as the canonical editable legal source in this repository.
