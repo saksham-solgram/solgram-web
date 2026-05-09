@@ -37,7 +37,7 @@ a {
 }
 
 .container {
-  width: min(560px, 92%);
+  width: min(1120px, 92%);
   margin: 0 auto;
 }
 
@@ -85,6 +85,8 @@ a {
   padding: 28px 0 36px;
   display: grid;
   gap: 0;
+  max-width: 640px;
+  margin: 0 auto;
 }
 
 .hero-panel {
@@ -338,6 +340,8 @@ p {
   background: linear-gradient(180deg, #fff, var(--panel));
   border-radius: 20px;
   padding: clamp(16px, 3vw, 30px);
+  max-width: 860px;
+  margin: 0 auto;
 }
 
 .policy-text {
@@ -404,6 +408,63 @@ footer {
 }
 
 .sections { grid-template-columns: 1fr; }
+
+@media (min-width: 768px) {
+  .home-hero {
+    max-width: 860px;
+  }
+
+  .hero-panel {
+    padding: 30px 30px 34px;
+  }
+
+  .store-badges {
+    grid-template-columns: 1fr 1fr;
+    width: 100%;
+    gap: 12px;
+  }
+
+  .store-badge {
+    width: 100%;
+    min-height: 62px;
+  }
+
+  .footer-inner {
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-between;
+  }
+}
+
+@media (min-width: 1024px) {
+  .home-hero {
+    max-width: 1080px;
+    grid-template-columns: 1.05fr 0.95fr;
+    gap: 18px;
+    align-items: stretch;
+  }
+
+  .single-visual {
+    margin-bottom: 0;
+    height: 100%;
+  }
+
+  .single-visual img {
+    height: 100%;
+    object-fit: cover;
+  }
+
+  .hero-panel {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    min-height: 100%;
+  }
+
+  .content-page {
+    padding-top: 44px;
+  }
+}
 
 @keyframes floatY {
   0%, 100% { transform: translateY(0); }
