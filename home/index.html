@@ -12,46 +12,85 @@
     <div class="page page--landing">
       <main class="landing">
         <div class="landing__content">
-          <img class="landing__logo" src="../assets/solgram-logo.svg" alt="Solgram" width="364" height="128">
+          <img
+            class="landing__logo"
+            src="../assets/solgram-logo.svg"
+            alt="Solgram"
+            width="364"
+            height="128"
+          >
           <h1 class="landing__tagline">
             <span class="landing__tagline-line">Better choices,</span>
             <span class="landing__tagline-line">thoughtfully delivered</span>
           </h1>
-          <div class="landing__stores" aria-label="App stores coming soon">
+
+          <div class="landing__download landing__download--desktop" aria-label="Download the app">
+            <div class="landing__qr-item">
+              <p class="landing__qr-label">Scan to download for iOS</p>
+              <div class="landing__qr-box landing__qr-box--empty" aria-hidden="true"></div>
+            </div>
+            <div class="landing__qr-item">
+              <p class="landing__qr-label">Scan to download for Android</p>
+              <a
+                class="landing__qr-link"
+                href="https://play.google.com/store/apps/details?id=world.solgram.customer"
+                target="_blank"
+                rel="noopener noreferrer"
+              >
+                <img
+                  class="landing__qr-image"
+                  src="../assets/Android_QR.png"
+                  alt="QR code to download Solgram on Google Play"
+                  width="179"
+                  height="179"
+                  decoding="async"
+                >
+              </a>
+            </div>
+          </div>
+
+          <div class="landing__download landing__download--mobile" aria-label="Download the app">
             <img
-              class="store-badge"
-              src="../assets/ios_store_badge.svg"
+              class="store-badge store-badge--ios"
+              src="../assets/ios_store_badge_mobile.svg"
               alt="Download on the App Store"
-              width="366"
-              height="114"
+              width="216"
+              height="68"
               decoding="async"
             >
-            <img
-              class="store-badge"
-              src="../assets/android_store_badge.svg"
-              alt="Get it on Google Play"
-              width="366"
-              height="114"
-              decoding="async"
+            <a
+              class="store-badge-link"
+              href="https://play.google.com/store/apps/details?id=world.solgram.customer"
+              target="_blank"
+              rel="noopener noreferrer"
             >
+              <img
+                class="store-badge store-badge--android"
+                src="../assets/android_store_badge_mobile.svg"
+                alt="Get it on Google Play"
+                width="216"
+                height="68"
+                decoding="async"
+              >
+            </a>
           </div>
         </div>
 
         <div class="landing__illustration-wrap">
           <img
             class="landing__illustration landing__illustration--desktop"
-            src="../assets/Desktop_website_illustration.png"
+            src="../assets/website_desktop_illustration.png"
             alt=""
             width="1210"
-            height="400"
+            height="399"
             decoding="async"
           >
           <img
             class="landing__illustration landing__illustration--mobile"
-            src="../assets/Mobile_website_illustration.png"
+            src="../assets/mobile_desktop_illustration.png"
             alt=""
-            width="1170"
-            height="717"
+            width="727"
+            height="240"
             decoding="async"
           >
         </div>
