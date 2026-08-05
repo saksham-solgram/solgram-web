@@ -7,6 +7,33 @@
     <title>Solgram World</title>
     <link rel="stylesheet" href="../styles.css">
     <link rel="canonical" href="/home/">
+    <script>
+      (function () {
+        // QR landings: send phones to the right store; desktop stays on this page.
+        // Skip with ?noredirect=1 for local testing.
+        try {
+          if (/(?:^|[?&])noredirect=1(?:&|$)/.test(location.search)) return;
+
+          var ua = navigator.userAgent || navigator.vendor || "";
+          var isAndroid = /Android/i.test(ua);
+          var isIOS =
+            /iPhone|iPad|iPod/i.test(ua) ||
+            (navigator.platform === "MacIntel" && navigator.maxTouchPoints > 1);
+
+          if (isAndroid) {
+            location.replace(
+              "https://play.google.com/store/apps/details?id=world.solgram.customer"
+            );
+            return;
+          }
+          if (isIOS) {
+            location.replace("https://apps.apple.com/us/app/solgram/id6777062542");
+          }
+        } catch (e) {
+          /* fall through to landing page */
+        }
+      })();
+    </script>
   </head>
   <body class="body--landing">
     <div class="page page--landing">
