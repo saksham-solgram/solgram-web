@@ -68,6 +68,17 @@
         color: var(--muted);
         font-size: 0.85rem;
       }
+      .referral__manual {
+        display: inline-block;
+        margin: 1rem 0 0;
+        color: var(--brand);
+        font-size: 0.9rem;
+        font-weight: 600;
+        text-decoration: none;
+      }
+      .referral__manual:hover {
+        text-decoration: underline;
+      }
       .referral__missing {
         color: var(--muted);
         font-size: 0.95rem;
@@ -102,15 +113,24 @@
         var content = document.getElementById("referral-content");
         if (!code) return;
 
+        // A plain store URL carries no install referrer, so the code would never
+        // reach a fresh install. Route through the OneLink instead, preserving
+        // the query string — that's what generates the Play install referrer.
+        // AppsFlyer reads the REAL request's user agent when this URL is hit
+        // (by an auto-redirect or a manual tap), so it always lands on the
+        // right store even if our own UA sniffing below guesses wrong.
+        var oneLinkUrl = ONELINK_URL + location.search;
+
         var ua = navigator.userAgent || navigator.vendor || "";
         var isAndroid = /Android/i.test(ua);
         var isIOS =
           /iPhone|iPad|iPod/i.test(ua) ||
           (navigator.platform === "MacIntel" && navigator.maxTouchPoints > 1);
-        // A plain store URL carries no install referrer, so the code would never
-        // reach a fresh install. Route through the OneLink instead, preserving
-        // the query string — that's what generates the Play install referrer.
-        var storeUrl = (isAndroid || isIOS) ? ONELINK_URL + location.search : null;
+        // Best-effort guess, used only to decide whether to auto-redirect and
+        // what to call the destination in the countdown text — "Desktop site"
+        // mode or an unusual browser can make this come out false on an
+        // actual phone, which is why the manual link below never depends on it.
+        var storeUrl = (isAndroid || isIOS) ? oneLinkUrl : null;
         var storeName = isAndroid ? "Play Store" : "App Store";
         var skipRedirect = getParam("noredirect") === "1";
 
@@ -121,7 +141,8 @@
           '<p class="referral__hint">Download the Solgram app and enter this code to claim your reward.</p>' +
           (storeUrl && !skipRedirect
             ? '<p class="referral__redirect" id="referral-redirect"></p>'
-            : "");
+            : "") +
+          '<a class="referral__manual" href="' + oneLinkUrl + '">Continue to Solgram →</a>';
 
         var button = document.getElementById("referral-copy-btn");
         button.addEventListener("click", function () {
