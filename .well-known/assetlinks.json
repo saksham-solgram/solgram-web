@@ -5,9 +5,9 @@
       "namespace": "android_app",
       "package_name": "world.solgram.customer",
       "sha256_cert_fingerprints": [
-        "9F:ED:BF:5C:48:5A:BE:49:F8:23:E0:30:E2:D6:5C:DE:E5:AC:28:7D:8E:30:BC:B8:DC:C1:58:6A:79:F5:C7:00",
-        "FA:C6:17:45:DC:09:03:78:6F:B9:ED:E6:2A:96:2B:39:9F:73:48:F0:BB:6F:89:9B:83:32:66:75:91:03:3B:9C"
-      ]
+        "9F:ED:BF:5C:48:5A:BE:49:F8:23:E0:30:E2:D6:5C:de:E5:AC:28:7D:8E:30:BC:B8:DC:C1:58:6A:79:F5:C7:00",
+        "A9:1D:80:24:DA:BE:F2:4A:BA:B4:FF:C0:FA:EB:9C:91:6B:E0:73:58:42:67:14:40:8F:A9:93:86:72:9B:56:7C"
+]
     }
   }
 ]
