@@ -1,9 +1,10 @@
 {
   "applinks": {
+    "apps": [],
     "details": [
       {
         "appID": "QGJP67RGHZ.world.solgram.customer",
-        "paths": ["/pod/*"]
+        "paths": ["/referral", "/referral/*", "/pod/*"]
       }
     ]
   }
