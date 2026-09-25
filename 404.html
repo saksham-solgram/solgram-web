@@ -134,7 +134,7 @@
         // stripping the way an unregistered custom param would not. af_dp is
         // read by the app when it's already installed (direct open).
         var params =
-          "?af_dp=" + encodeURIComponent("solgram://product/" + sku) +
+          "?af_dp=" + encodeURIComponent("solgram-rn://product/" + sku) +
           "&deep_link_sub2=" + encodeURIComponent(sku) +
           "&deep_link_value=" + encodeURIComponent(sku);
         var oneLinkUrl = ONELINK_URL + params;
