@@ -41,6 +41,16 @@
         width: auto;
         margin-bottom: 1.5rem;
       }
+      .redirect__thumb {
+        display: block;
+        width: 96px;
+        height: 96px;
+        object-fit: contain;
+        background: #fff;
+        border: 1px solid var(--border);
+        border-radius: 16px;
+        margin: 0 auto 1.25rem;
+      }
       .redirect__label {
         margin: 0 0 0.5rem;
         color: var(--muted);
@@ -109,6 +119,7 @@
         // (Universal Links/App Links open the app without ever loading this
         // page) but means chat-app link previews may not always render.
         var ONELINK_URL = "https://solgram.onelink.me/kyZR/referral2026";
+        var API_BASE = "https://api.solgram.world";
         var REDIRECT_DELAY_SECONDS = 3;
 
         var match = /^\/product\/([^/]+)\/?$/.exec(location.pathname);
@@ -138,13 +149,34 @@
         var skipRedirect = /(?:^|[?&])noredirect=1(?:&|$)/.test(location.search);
 
         content.innerHTML =
+          '<img class="redirect__thumb" id="redirect-thumb" style="display:none" alt="">' +
           '<p class="redirect__label">Opening this product in Solgram</p>' +
-          '<p class="redirect__sku">' + sku + '</p>' +
+          '<p class="redirect__sku" id="redirect-title">' + sku + '</p>' +
           '<p class="redirect__hint">Don’t have the app yet? Install it and this product will open automatically.</p>' +
           (storeUrl && !skipRedirect
             ? '<p class="redirect__status" id="redirect-status"></p>'
             : "") +
           '<a class="redirect__manual" href="' + oneLinkUrl + '">Continue to Solgram →</a>';
+
+        // Decorative only — fills in the product name/image once the API
+        // responds. Never blocks or delays the redirect below: OG tags are
+        // static (GitHub Pages can't render per-product previews), so this
+        // only improves what a visitor sees if they load the page directly.
+        fetch(API_BASE + "/api/products/sku/" + encodeURIComponent(sku))
+          .then(function (r) { return r.ok ? r.json() : null; })
+          .then(function (json) {
+            var data = json && json.success && json.data;
+            if (!data) return;
+            var titleEl = document.getElementById("redirect-title");
+            var thumbEl = document.getElementById("redirect-thumb");
+            var imageUrl = data.pdp_url || (data.sku_img && data.sku_img[0]);
+            if (titleEl && data.sku_name) titleEl.textContent = data.sku_name;
+            if (thumbEl && imageUrl) {
+              thumbEl.src = imageUrl;
+              thumbEl.style.display = "block";
+            }
+          })
+          .catch(function () {});
 
         if (!storeUrl || skipRedirect) return;
 
