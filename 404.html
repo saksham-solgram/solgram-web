@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta name="description" content="Solgram">
     <title>Solgram</title>
-    <link rel="stylesheet" href="styles.css">
+    <link rel="stylesheet" href="/styles.css">
 
     <!-- Link-preview image for share cards (WhatsApp, Instagram, iMessage, etc.) -->
     <meta property="og:type" content="website">
@@ -65,7 +65,7 @@
   <body>
     <div class="page redirect">
       <div class="redirect__card">
-        <img class="redirect__logo" id="redirect-logo" src="assets/solgram-logo.svg" alt="Solgram">
+        <img class="redirect__logo" id="redirect-logo" src="/assets/solgram-logo.svg" alt="Solgram">
         <div id="redirect-content">
           <p class="redirect__missing">Page not found.</p>
           <a class="redirect__home" href="/">Go to solgram.world →</a>
@@ -131,7 +131,7 @@
         var skipRedirect = /(?:^|[?&])noredirect=1(?:&|$)/.test(location.search);
 
         content.innerHTML =
-          '<img class="redirect__logo-big" src="assets/icon_master.png" alt="Solgram">' +
+          '<img class="redirect__logo-big" src="/assets/icon_master.png" alt="Solgram">' +
           '<a class="btn" href="' + oneLinkUrl + '">Continue to Solgram →</a>';
 
         if (!storeUrl || skipRedirect) return;
