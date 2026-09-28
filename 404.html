@@ -41,49 +41,13 @@
         width: auto;
         margin-bottom: 1.5rem;
       }
-      .redirect__thumb {
+      .redirect__logo-big {
         display: block;
-        width: 96px;
-        height: 96px;
+        width: 140px;
+        height: 140px;
         object-fit: contain;
-        background: #fff;
-        border: 1px solid var(--border);
-        border-radius: 16px;
-        margin: 0 auto 1.25rem;
-      }
-      .redirect__label {
-        margin: 0 0 0.5rem;
-        color: var(--muted);
-        font-size: 0.95rem;
-      }
-      .redirect__sku {
-        font-family: "Hedvig Letters Serif", "Hanken Grotesk", serif;
-        font-size: 1.6rem;
-        letter-spacing: 0.02em;
-        color: var(--brand);
-        margin: 0 0 1.25rem;
-        word-break: break-all;
-      }
-      .redirect__hint {
-        margin: 1rem 0 0;
-        color: var(--muted);
-        font-size: 0.85rem;
-      }
-      .redirect__status {
-        margin: 0.75rem 0 0;
-        color: var(--muted);
-        font-size: 0.85rem;
-      }
-      .redirect__manual {
-        display: inline-block;
-        margin: 1rem 0 0;
-        color: var(--brand);
-        font-size: 0.9rem;
-        font-weight: 600;
-        text-decoration: none;
-      }
-      .redirect__manual:hover {
-        text-decoration: underline;
+        border-radius: 28px;
+        margin: 0 auto 1.75rem;
       }
       .redirect__missing {
         color: var(--muted);
@@ -101,7 +65,7 @@
   <body>
     <div class="page redirect">
       <div class="redirect__card">
-        <img class="redirect__logo" src="assets/solgram-logo.svg" alt="Solgram">
+        <img class="redirect__logo" id="redirect-logo" src="assets/solgram-logo.svg" alt="Solgram">
         <div id="redirect-content">
           <p class="redirect__missing">Page not found.</p>
           <a class="redirect__home" href="/">Go to solgram.world →</a>
@@ -119,8 +83,7 @@
         // (Universal Links/App Links open the app without ever loading this
         // page) but means chat-app link previews may not always render.
         var ONELINK_URL = "https://solgram.onelink.me/kyZR/referral2026";
-        var API_BASE = "https://api.solgram.world";
-        var REDIRECT_DELAY_SECONDS = 3;
+        var REDIRECT_DELAY_SECONDS = 1;
 
         // Every supported deep-link type follows the exact same routing
         // recipe as /product/<sku> (same OneLink, same param names) — the
@@ -141,6 +104,8 @@
 
         var code = decodeURIComponent(match[1]);
         var content = document.getElementById("redirect-content");
+        var logoEl = document.getElementById("redirect-logo");
+        if (logoEl) logoEl.style.display = "none";
 
         // Same OneLink used for referral — no separate OneLink per feature.
         // deep_link_sub2 (distinct from referral's deep_link_sub1) is a
@@ -163,59 +128,17 @@
           /iPhone|iPad|iPod/i.test(ua) ||
           (navigator.platform === "MacIntel" && navigator.maxTouchPoints > 1);
         var storeUrl = (isAndroid || isIOS) ? oneLinkUrl : null;
-        var storeName = isAndroid ? "Play Store" : "App Store";
         var skipRedirect = /(?:^|[?&])noredirect=1(?:&|$)/.test(location.search);
 
         content.innerHTML =
-          '<img class="redirect__thumb" id="redirect-thumb" style="display:none" alt="">' +
-          '<p class="redirect__label">Opening this ' + route.label + ' in Solgram</p>' +
-          '<p class="redirect__sku" id="redirect-title">' + code + '</p>' +
-          '<p class="redirect__hint">Don’t have the app yet? Install it and this ' + route.label + ' will open automatically.</p>' +
-          (storeUrl && !skipRedirect
-            ? '<p class="redirect__status" id="redirect-status"></p>'
-            : "") +
-          '<a class="redirect__manual" href="' + oneLinkUrl + '">Continue to Solgram →</a>';
-
-        // Decorative only — fills in the product name/image once the API
-        // responds. Never blocks or delays the redirect below: OG tags are
-        // static (GitHub Pages can't render per-product previews), so this
-        // only improves what a visitor sees if they load the page directly.
-        // No equivalent "look up by bare code" endpoint exists for category/
-        // subcategory (only /api/products/sku/:skuCode does), so those two
-        // just show the code as-is rather than guessing at another API shape.
-        if (route.type === "product") {
-          fetch(API_BASE + "/api/products/sku/" + encodeURIComponent(code))
-            .then(function (r) { return r.ok ? r.json() : null; })
-            .then(function (json) {
-              var data = json && json.success && json.data;
-              if (!data) return;
-              var titleEl = document.getElementById("redirect-title");
-              var thumbEl = document.getElementById("redirect-thumb");
-              var imageUrl = data.pdp_url || (data.sku_img && data.sku_img[0]);
-              if (titleEl && data.sku_name) titleEl.textContent = data.sku_name;
-              if (thumbEl && imageUrl) {
-                thumbEl.src = imageUrl;
-                thumbEl.style.display = "block";
-              }
-            })
-            .catch(function () {});
-        }
+          '<img class="redirect__logo-big" src="assets/icon_master.png" alt="Solgram">' +
+          '<a class="btn" href="' + oneLinkUrl + '">Continue to Solgram →</a>';
 
         if (!storeUrl || skipRedirect) return;
 
-        var secondsLeft = REDIRECT_DELAY_SECONDS;
-        var statusEl = document.getElementById("redirect-status");
-        function tick() {
-          statusEl.textContent =
-            "Taking you to the " + storeName + " in " + secondsLeft + "s…";
-          if (secondsLeft <= 0) {
-            location.replace(storeUrl);
-            return;
-          }
-          secondsLeft -= 1;
-          setTimeout(tick, 1000);
-        }
-        tick();
+        setTimeout(function () {
+          location.replace(storeUrl);
+        }, REDIRECT_DELAY_SECONDS * 1000);
       })();
     </script>
   </body>
