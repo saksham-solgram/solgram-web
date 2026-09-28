@@ -122,10 +122,24 @@
         var API_BASE = "https://api.solgram.world";
         var REDIRECT_DELAY_SECONDS = 3;
 
-        var match = /^\/product\/([^/]+)\/?$/.exec(location.pathname);
-        if (!match) return; // real 404 — leave the default "page not found" content
+        // Every supported deep-link type follows the exact same routing
+        // recipe as /product/<sku> (same OneLink, same param names) — the
+        // app-side scheme (solgram-rn://<type>/<code>) doesn't exist yet on
+        // the app team's end; this is the spec we're handing them.
+        var ROUTES = [
+          { type: "product", regex: /^\/product\/([^/]+)\/?$/, label: "product" },
+          { type: "category", regex: /^\/category\/([^/]+)\/?$/, label: "category" },
+          { type: "subcategory", regex: /^\/subcategory\/([^/]+)\/?$/, label: "subcategory" },
+        ];
 
-        var sku = decodeURIComponent(match[1]);
+        var route, match;
+        for (var i = 0; i < ROUTES.length; i++) {
+          match = ROUTES[i].regex.exec(location.pathname);
+          if (match) { route = ROUTES[i]; break; }
+        }
+        if (!route) return; // real 404 — leave the default "page not found" content
+
+        var code = decodeURIComponent(match[1]);
         var content = document.getElementById("redirect-content");
 
         // Same OneLink used for referral — no separate OneLink per feature.
@@ -134,9 +148,9 @@
         // stripping the way an unregistered custom param would not. af_dp is
         // read by the app when it's already installed (direct open).
         var params =
-          "?af_dp=" + encodeURIComponent("solgram://product/" + sku) +
-          "&deep_link_sub2=" + encodeURIComponent(sku) +
-          "&deep_link_value=" + encodeURIComponent(sku);
+          "?af_dp=" + encodeURIComponent("solgram-rn://" + route.type + "/" + code) +
+          "&deep_link_sub2=" + encodeURIComponent(code) +
+          "&deep_link_value=" + encodeURIComponent(code);
         var oneLinkUrl = ONELINK_URL + params;
 
         var ua = navigator.userAgent || navigator.vendor || "";
@@ -150,9 +164,9 @@
 
         content.innerHTML =
           '<img class="redirect__thumb" id="redirect-thumb" style="display:none" alt="">' +
-          '<p class="redirect__label">Opening this product in Solgram</p>' +
-          '<p class="redirect__sku" id="redirect-title">' + sku + '</p>' +
-          '<p class="redirect__hint">Don’t have the app yet? Install it and this product will open automatically.</p>' +
+          '<p class="redirect__label">Opening this ' + route.label + ' in Solgram</p>' +
+          '<p class="redirect__sku" id="redirect-title">' + code + '</p>' +
+          '<p class="redirect__hint">Don’t have the app yet? Install it and this ' + route.label + ' will open automatically.</p>' +
           (storeUrl && !skipRedirect
             ? '<p class="redirect__status" id="redirect-status"></p>'
             : "") +
@@ -162,21 +176,26 @@
         // responds. Never blocks or delays the redirect below: OG tags are
         // static (GitHub Pages can't render per-product previews), so this
         // only improves what a visitor sees if they load the page directly.
-        fetch(API_BASE + "/api/products/sku/" + encodeURIComponent(sku))
-          .then(function (r) { return r.ok ? r.json() : null; })
-          .then(function (json) {
-            var data = json && json.success && json.data;
-            if (!data) return;
-            var titleEl = document.getElementById("redirect-title");
-            var thumbEl = document.getElementById("redirect-thumb");
-            var imageUrl = data.pdp_url || (data.sku_img && data.sku_img[0]);
-            if (titleEl && data.sku_name) titleEl.textContent = data.sku_name;
-            if (thumbEl && imageUrl) {
-              thumbEl.src = imageUrl;
-              thumbEl.style.display = "block";
-            }
-          })
-          .catch(function () {});
+        // No equivalent "look up by bare code" endpoint exists for category/
+        // subcategory (only /api/products/sku/:skuCode does), so those two
+        // just show the code as-is rather than guessing at another API shape.
+        if (route.type === "product") {
+          fetch(API_BASE + "/api/products/sku/" + encodeURIComponent(code))
+            .then(function (r) { return r.ok ? r.json() : null; })
+            .then(function (json) {
+              var data = json && json.success && json.data;
+              if (!data) return;
+              var titleEl = document.getElementById("redirect-title");
+              var thumbEl = document.getElementById("redirect-thumb");
+              var imageUrl = data.pdp_url || (data.sku_img && data.sku_img[0]);
+              if (titleEl && data.sku_name) titleEl.textContent = data.sku_name;
+              if (thumbEl && imageUrl) {
+                thumbEl.src = imageUrl;
+                thumbEl.style.display = "block";
+              }
+            })
+            .catch(function () {});
+        }
 
         if (!storeUrl || skipRedirect) return;
 
