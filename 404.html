@@ -146,10 +146,14 @@
         // deep_link_sub2 (distinct from referral's deep_link_sub1) is a
         // reserved AppsFlyer param, so it survives Play Store install-referrer
         // stripping the way an unregistered custom param would not. af_dp is
-        // read by the app when it's already installed (direct open).
+        // read by the app when it's already installed (direct open); on a
+        // fresh install we can't yet confirm af_dp itself survives, so the
+        // type also goes in its own reserved param (deep_link_sub3) rather
+        // than making the app parse it back out of af_dp.
         var params =
           "?af_dp=" + encodeURIComponent("solgram-rn://" + route.type + "/" + code) +
           "&deep_link_sub2=" + encodeURIComponent(code) +
+          "&deep_link_sub3=" + encodeURIComponent(route.type) +
           "&deep_link_value=" + encodeURIComponent(code);
         var oneLinkUrl = ONELINK_URL + params;
 
