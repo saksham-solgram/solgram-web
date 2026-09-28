@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta name="description" content="Your Solgram referral code.">
     <title>Solgram — Referral Code</title>
-    <link rel="stylesheet" href="../styles.css">
+    <link rel="stylesheet" href="/styles.css">
     <link rel="canonical" href="/referral/">
 
     <!-- Link-preview image for share cards (WhatsApp, Instagram, iMessage, etc.) -->
@@ -43,55 +43,13 @@
         width: auto;
         margin-bottom: 1.5rem;
       }
-      .referral__label {
-        margin: 0 0 0.75rem;
-        color: var(--muted);
-        font-size: 0.95rem;
-      }
-      .referral__code {
-        font-family: "Hedvig Letters Serif", "Hanken Grotesk", serif;
-        font-size: 2.25rem;
-        letter-spacing: 0.06em;
-        color: var(--brand);
-        margin: 0 0 1.5rem;
-        word-break: break-all;
-      }
-      .referral__copy {
-        appearance: none;
-        border: none;
-        background: var(--brand);
-        color: #fff;
-        font-family: inherit;
-        font-size: 1rem;
-        font-weight: 600;
-        padding: 0.75rem 1.5rem;
-        border-radius: 999px;
-        cursor: pointer;
-        transition: opacity 0.15s ease;
-      }
-      .referral__copy:hover {
-        opacity: 0.9;
-      }
-      .referral__hint {
-        margin: 1rem 0 0;
-        color: var(--muted);
-        font-size: 0.85rem;
-      }
-      .referral__redirect {
-        margin: 0.75rem 0 0;
-        color: var(--muted);
-        font-size: 0.85rem;
-      }
-      .referral__manual {
-        display: inline-block;
-        margin: 1rem 0 0;
-        color: var(--brand);
-        font-size: 0.9rem;
-        font-weight: 600;
-        text-decoration: none;
-      }
-      .referral__manual:hover {
-        text-decoration: underline;
+      .referral__logo-big {
+        display: block;
+        width: 140px;
+        height: 140px;
+        object-fit: contain;
+        border-radius: 28px;
+        margin: 0 auto 1.75rem;
       }
       .referral__missing {
         color: var(--muted);
@@ -104,7 +62,8 @@
       <div class="referral__card">
         <img
           class="referral__logo"
-          src="../assets/solgram-logo.svg"
+          id="referral-logo"
+          src="/assets/solgram-logo.svg"
           alt="Solgram"
         >
         <div id="referral-content">
@@ -116,7 +75,7 @@
     <script>
       (function () {
         var ONELINK_URL = "https://solgram.onelink.me/kyZR/referral2026";
-        var REDIRECT_DELAY_SECONDS = 3;
+        var REDIRECT_DELAY_SECONDS = 1;
 
         function getParam(name) {
           var match = new RegExp("(?:^|[?&])" + name + "=([^&]*)").exec(location.search);
@@ -126,6 +85,9 @@
         var code = getParam("referral_code") || getParam("deep_link_sub1");
         var content = document.getElementById("referral-content");
         if (!code) return;
+
+        var logoEl = document.getElementById("referral-logo");
+        if (logoEl) logoEl.style.display = "none";
 
         // A plain store URL carries no install referrer, so the code would never
         // reach a fresh install. Route through the OneLink instead, preserving
@@ -140,63 +102,22 @@
         var isIOS =
           /iPhone|iPad|iPod/i.test(ua) ||
           (navigator.platform === "MacIntel" && navigator.maxTouchPoints > 1);
-        // Best-effort guess, used only to decide whether to auto-redirect and
-        // what to call the destination in the countdown text — "Desktop site"
-        // mode or an unusual browser can make this come out false on an
-        // actual phone, which is why the manual link below never depends on it.
+        // Best-effort guess, used only to decide whether to auto-redirect —
+        // "Desktop site" mode or an unusual browser can make this come out
+        // false on an actual phone, which is why the manual link below
+        // never depends on it.
         var storeUrl = (isAndroid || isIOS) ? oneLinkUrl : null;
-        var storeName = isAndroid ? "Play Store" : "App Store";
         var skipRedirect = getParam("noredirect") === "1";
 
         content.innerHTML =
-          '<p class="referral__label">You’ve been invited to Solgram — your code is</p>' +
-          '<p class="referral__code" id="referral-code">' + code + '</p>' +
-          '<button class="referral__copy" id="referral-copy-btn" type="button">Copy code</button>' +
-          '<p class="referral__hint">Download the Solgram app and enter this code to claim your reward.</p>' +
-          (storeUrl && !skipRedirect
-            ? '<p class="referral__redirect" id="referral-redirect"></p>'
-            : "") +
-          '<a class="referral__manual" href="' + oneLinkUrl + '">Continue to Solgram →</a>';
-
-        var button = document.getElementById("referral-copy-btn");
-        button.addEventListener("click", function () {
-          var text = document.getElementById("referral-code").textContent;
-          function done() {
-            button.textContent = "Copied!";
-            setTimeout(function () {
-              button.textContent = "Copy code";
-            }, 1500);
-          }
-          if (navigator.clipboard && navigator.clipboard.writeText) {
-            navigator.clipboard.writeText(text).then(done, done);
-          } else {
-            var temp = document.createElement("textarea");
-            temp.value = text;
-            temp.style.position = "fixed";
-            temp.style.opacity = "0";
-            document.body.appendChild(temp);
-            temp.select();
-            try { document.execCommand("copy"); } catch (e) {}
-            document.body.removeChild(temp);
-            done();
-          }
-        });
+          '<img class="referral__logo-big" src="/assets/icon_master.png" alt="Solgram">' +
+          '<a class="btn" href="' + oneLinkUrl + '">Continue to Solgram →</a>';
 
         if (!storeUrl || skipRedirect) return;
 
-        var secondsLeft = REDIRECT_DELAY_SECONDS;
-        var redirectEl = document.getElementById("referral-redirect");
-        function tick() {
-          redirectEl.textContent =
-            "Taking you to the " + storeName + " in " + secondsLeft + "s…";
-          if (secondsLeft <= 0) {
-            location.replace(storeUrl);
-            return;
-          }
-          secondsLeft -= 1;
-          setTimeout(tick, 1000);
-        }
-        tick();
+        setTimeout(function () {
+          location.replace(storeUrl);
+        }, REDIRECT_DELAY_SECONDS * 1000);
       })();
     </script>
   </body>
