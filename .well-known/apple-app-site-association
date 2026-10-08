@@ -4,7 +4,7 @@
     "details": [
       {
         "appID": "QGJP67RGHZ.world.solgram.customer",
-        "paths": ["/referral", "/referral/*", "/product/*", "/category/*", "/subcategory/*"]
+        "paths": ["/referral", "/referral/*", "/product/*", "/category/*", "/subcategory/*", "/screen/*", "/order/*", "/cart", "/cart/*"]
       }
     ]
   }
