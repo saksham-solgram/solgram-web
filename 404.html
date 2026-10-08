@@ -97,6 +97,10 @@
           // the category's sub-categories as tabs. Same `subcategory` type; the
           // category code rides along in deep_link_sub4 (see below).
           { type: "subcategory", regex: /^\/category\/([^/]+)\/([^/]+)\/?$/, label: "subcategory", codeIndex: 2, categoryIndex: 1 },
+          { type: "screen", regex: /^\/screen\/([^/]+)\/?$/, label: "screen" },
+          { type: "order", regex: /^\/order\/([^/]+)\/?$/, label: "order" },
+          // Cart is per-user, so the code segment is optional (/cart or /cart/<id>).
+          { type: "cart", regex: /^\/cart(?:\/([^/]+))?\/?$/, label: "cart" },
         ];
 
         var route, match;
@@ -106,7 +110,8 @@
         }
         if (!route) return; // real 404 — leave the default "page not found" content
 
-        var code = decodeURIComponent(match[route.codeIndex || 1]);
+        var codeRaw = match[route.codeIndex || 1];
+        var code = codeRaw ? decodeURIComponent(codeRaw) : "";
         var categoryCode = route.categoryIndex ? decodeURIComponent(match[route.categoryIndex]) : "";
         var content = document.getElementById("redirect-content");
         var logoEl = document.getElementById("redirect-logo");
@@ -121,10 +126,13 @@
         // type also goes in its own reserved param (deep_link_sub3) rather
         // than making the app parse it back out of af_dp.
         var params =
-          "?af_dp=" + encodeURIComponent("solgram-rn://" + route.type + "/" + code) +
-          "&deep_link_sub2=" + encodeURIComponent(code) +
-          "&deep_link_sub3=" + encodeURIComponent(route.type) +
-          "&deep_link_value=" + encodeURIComponent(code);
+          "?af_dp=" + encodeURIComponent("solgram-rn://" + route.type + (code ? "/" + code : "")) +
+          "&deep_link_sub3=" + encodeURIComponent(route.type);
+        if (code) {
+          params +=
+            "&deep_link_sub2=" + encodeURIComponent(code) +
+            "&deep_link_value=" + encodeURIComponent(code);
+        }
         if (categoryCode) params += "&deep_link_sub4=" + encodeURIComponent(categoryCode);
         var oneLinkUrl = ONELINK_URL + params;
 
