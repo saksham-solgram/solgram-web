@@ -118,16 +118,14 @@
         if (logoEl) logoEl.style.display = "none";
 
         // Same OneLink used for referral — no separate OneLink per feature.
-        // deep_link_sub2 (distinct from referral's deep_link_sub1) is a
-        // reserved AppsFlyer param, so it survives Play Store install-referrer
-        // stripping the way an unregistered custom param would not. af_dp is
-        // read by the app when it's already installed (direct open); on a
-        // fresh install we can't yet confirm af_dp itself survives, so the
-        // type also goes in its own reserved param (deep_link_sub3) rather
-        // than making the app parse it back out of af_dp.
-        var params =
-          "?af_dp=" + encodeURIComponent("solgram-rn://" + route.type + (code ? "/" + code : "")) +
-          "&deep_link_sub3=" + encodeURIComponent(route.type);
+        // Only AppsFlyer-reserved deep_link_sub* params survive the store
+        // install, so the type rides in deep_link_sub3 and the code in
+        // deep_link_sub2 (deep_link_value repeats it for compatibility). af_dp
+        // is deliberately NOT sent: it makes OneLink answer with an interstitial
+        // page instead of a clean 301, which in-app browsers can block. The
+        // installed-app case is handled by App/Universal Links and never loads
+        // this page.
+        var params = "?deep_link_sub3=" + encodeURIComponent(route.type);
         if (code) {
           params +=
             "&deep_link_sub2=" + encodeURIComponent(code) +
