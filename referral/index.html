@@ -74,7 +74,8 @@
 
     <script>
       (function () {
-        var ONELINK_URL = "https://solgram.onelink.me/kyZR/referral2026";
+        var PLAY_STORE_URL = "https://play.google.com/store/apps/details?id=world.solgram.customer";
+        var APP_STORE_URL = "https://apps.apple.com/IN/app/id6777062542";
         var REDIRECT_DELAY_SECONDS = 1;
 
         function getParam(name) {
@@ -89,17 +90,6 @@
         var logoEl = document.getElementById("referral-logo");
         if (logoEl) logoEl.style.display = "none";
 
-        // A plain store URL carries no install referrer, so the code would never
-        // reach a fresh install. Route through the OneLink instead, preserving
-        // the query string — that's what generates the Play install referrer.
-        // AppsFlyer reads the REAL request's user agent when this URL is hit
-        // (by an auto-redirect or a manual tap), so it always lands on the
-        // right store even if our own UA sniffing below guesses wrong.
-        var oneLinkUrl =
-          ONELINK_URL +
-          "?referral_code=" + encodeURIComponent(code) +
-          "&deep_link_sub1=" + encodeURIComponent(code);
-
         var ua = navigator.userAgent || navigator.vendor || "";
         var isAndroid = /Android/i.test(ua);
         var isIOS =
@@ -109,12 +99,22 @@
         // "Desktop site" mode or an unusual browser can make this come out
         // false on an actual phone, which is why the manual link below
         // never depends on it.
-        var storeUrl = (isAndroid || isIOS) ? oneLinkUrl : null;
+        // Android: Play hands the "referrer" value to the app on first launch,
+        // so the code survives the store install. Both keys are sent to match
+        // the app contract (deep_link_sub1; referral_code on the installed
+        // path). iOS has no install referrer, so it gets the plain store URL.
+        var playReferrer =
+          "deep_link_sub1=" + encodeURIComponent(code) +
+          "&referral_code=" + encodeURIComponent(code);
+        var storeLink = isIOS
+          ? APP_STORE_URL
+          : PLAY_STORE_URL + "&referrer=" + encodeURIComponent(playReferrer);
+        var storeUrl = (isAndroid || isIOS) ? storeLink : null;
         var skipRedirect = getParam("noredirect") === "1";
 
         content.innerHTML =
           '<img class="referral__logo-big" src="/assets/icon_master.png" alt="Solgram">' +
-          '<a class="btn" href="' + oneLinkUrl + '">Continue to Solgram →</a>';
+          '<a class="btn" href="' + storeLink + '">Continue to Solgram →</a>';
 
         if (!storeUrl || skipRedirect) return;
 
