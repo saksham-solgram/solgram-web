@@ -95,7 +95,10 @@
         // AppsFlyer reads the REAL request's user agent when this URL is hit
         // (by an auto-redirect or a manual tap), so it always lands on the
         // right store even if our own UA sniffing below guesses wrong.
-        var oneLinkUrl = ONELINK_URL + location.search;
+        var oneLinkUrl =
+          ONELINK_URL +
+          "?referral_code=" + encodeURIComponent(code) +
+          "&deep_link_sub1=" + encodeURIComponent(code);
 
         var ua = navigator.userAgent || navigator.vendor || "";
         var isAndroid = /Android/i.test(ua);
