@@ -94,6 +94,10 @@
           { type: "product", regex: /^\/product\/([^/]+)\/?$/, label: "product" },
           { type: "category", regex: /^\/category\/([^/]+)\/?$/, label: "category" },
           { type: "subcategory", regex: /^\/subcategory\/([^/]+)\/?$/, label: "subcategory" },
+          // /category/<category_code>/<subcategory_code> — sub-category page with
+          // the category's sub-categories as tabs. Same `subcategory` type; the
+          // category code rides along in deep_link_sub4 (see below).
+          { type: "subcategory", regex: /^\/category\/([^/]+)\/([^/]+)\/?$/, label: "subcategory", codeIndex: 2, categoryIndex: 1 },
           { type: "screen", regex: /^\/screen\/([^/]+)\/?$/, label: "screen" },
           { type: "order", regex: /^\/order\/([^/]+)\/?$/, label: "order" },
           // Cart is per-user, so the code segment is optional (/cart or /cart/<id>).
@@ -107,7 +111,9 @@
         }
         if (!route) return; // real 404 — leave the default "page not found" content
 
-        var code = match[1] ? decodeURIComponent(match[1]) : "";
+        var codeRaw = match[route.codeIndex || 1];
+        var code = codeRaw ? decodeURIComponent(codeRaw) : "";
+        var categoryCode = route.categoryIndex ? decodeURIComponent(match[route.categoryIndex]) : "";
         var content = document.getElementById("redirect-content");
         var logoEl = document.getElementById("redirect-logo");
         if (logoEl) logoEl.style.display = "none";
@@ -128,6 +134,7 @@
             "&deep_link_sub2=" + encodeURIComponent(code) +
             "&deep_link_value=" + encodeURIComponent(code);
         }
+        if (categoryCode) params += "&deep_link_sub4=" + encodeURIComponent(categoryCode);
         var ua = navigator.userAgent || navigator.vendor || "";
         var isAndroid = /Android/i.test(ua);
         var isIOS =
