@@ -99,13 +99,40 @@
         // "Desktop site" mode or an unusual browser can make this come out
         // false on an actual phone, which is why the manual link below
         // never depends on it.
-        var storeLink = isIOS ? APP_STORE_URL : PLAY_STORE_URL;
-        var autoRedirectUrl = (isAndroid || isIOS) ? storeLink : null;
+        // Play hands the "referrer" value to the app after install, so the code
+        // survives the store round trip on Android. iOS has no such channel:
+        // the code is copied to the clipboard for the app to pick up instead.
+        var storeLink = isIOS
+          ? APP_STORE_URL
+          : PLAY_STORE_URL + "&referrer=" + encodeURIComponent("referral_code=" + encodeURIComponent(code));
+        // iOS Safari only allows a clipboard write from a tap, so iOS is not
+        // auto-redirected; the button copies the code, then goes to the store.
+        var autoRedirectUrl = isAndroid ? storeLink : null;
         var skipRedirect = getParam("noredirect") === "1";
 
         content.innerHTML =
           '<img class="referral__logo-big" src="/assets/icon_master.png" alt="Solgram">' +
-          '<a class="btn" href="' + storeLink + '">Continue to Solgram →</a>';
+          '<a class="btn" id="referral-continue" href="' + storeLink + '">Continue to Solgram →</a>';
+
+        if (isIOS) {
+          document.getElementById("referral-continue").addEventListener("click", function (e) {
+            e.preventDefault();
+            var done = false;
+            function go() {
+              if (done) return;
+              done = true;
+              location.href = storeLink;
+            }
+            try {
+              if (navigator.clipboard && navigator.clipboard.writeText) {
+                navigator.clipboard.writeText(code).then(go, go);
+                setTimeout(go, 500);
+                return;
+              }
+            } catch (err) {}
+            go();
+          });
+        }
 
         if (!autoRedirectUrl || skipRedirect) return;
 

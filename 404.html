@@ -140,7 +140,11 @@
         var isIOS =
           /iPhone|iPad|iPod/i.test(ua) ||
           (navigator.platform === "MacIntel" && navigator.maxTouchPoints > 1);
-        var storeLink = isIOS ? APP_STORE_URL : PLAY_STORE_URL;
+        // Play passes "referrer" to the app after install, so the same deep-link
+        // params survive the store round trip on Android. iOS has no equivalent.
+        var storeLink = isIOS
+          ? APP_STORE_URL
+          : PLAY_STORE_URL + "&referrer=" + encodeURIComponent(params.slice(1));
         var autoRedirectUrl = (isAndroid || isIOS) ? storeLink : null;
         var skipRedirect = /(?:^|[?&])noredirect=1(?:&|$)/.test(location.search);
 
