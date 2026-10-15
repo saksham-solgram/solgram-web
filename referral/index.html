@@ -86,19 +86,21 @@
         var content = document.getElementById("referral-content");
         if (!code) return;
 
-        // Remember the code in this browser so /claim can hand it to the app
-        // after a fresh install (7 days). Only a well-formed code is stored.
-        var savedCode = code.toUpperCase();
-        if (/^SG[A-Z0-9]{1,18}$/.test(savedCode)) {
-          try {
-            localStorage.setItem("solgram_ref", JSON.stringify({ code: savedCode, ts: Date.now() }));
-          } catch (e) {}
-          try {
-            document.cookie =
-              "solgram_ref=" + encodeURIComponent(savedCode) +
-              "; max-age=604800; path=/; SameSite=Lax; Secure";
-          } catch (e) {}
-        }
+        // DISABLED: the /claim flow is switched off for now. To re-enable, uncomment this block
+        // and the script in claim/index.html.
+        // // Remember the code in this browser so /claim can hand it to the app
+        // // after a fresh install (7 days). Only a well-formed code is stored.
+        // var savedCode = code.toUpperCase();
+        // if (/^SG[A-Z0-9]{1,18}$/.test(savedCode)) {
+        //   try {
+        //     localStorage.setItem("solgram_ref", JSON.stringify({ code: savedCode, ts: Date.now() }));
+        //   } catch (e) {}
+        //   try {
+        //     document.cookie =
+        //       "solgram_ref=" + encodeURIComponent(savedCode) +
+        //       "; max-age=604800; path=/; SameSite=Lax; Secure";
+        //   } catch (e) {}
+        // }
 
         var logoEl = document.getElementById("referral-logo");
         if (logoEl) logoEl.style.display = "none";
