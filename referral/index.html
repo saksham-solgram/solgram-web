@@ -109,12 +109,36 @@
         // "Desktop site" mode or an unusual browser can make this come out
         // false on an actual phone, which is why the manual link below
         // never depends on it.
-        var storeUrl = (isAndroid || isIOS) ? oneLinkUrl : null;
+        // iOS has no install referrer, so the code is also copied to the
+        // clipboard for the app to read on first launch. Safari only allows a
+        // clipboard write from a tap, so iOS is not auto-redirected: the
+        // button copies the code, then continues. Android auto-redirects as before.
+        var storeUrl = isAndroid ? oneLinkUrl : null;
         var skipRedirect = getParam("noredirect") === "1";
 
         content.innerHTML =
           '<img class="referral__logo-big" src="/assets/icon_master.png" alt="Solgram">' +
-          '<a class="btn" href="' + oneLinkUrl + '">Continue to Solgram →</a>';
+          '<a class="btn" id="referral-continue" href="' + oneLinkUrl + '">Continue to Solgram →</a>';
+
+        if (isIOS) {
+          document.getElementById("referral-continue").addEventListener("click", function (e) {
+            e.preventDefault();
+            var done = false;
+            function go() {
+              if (done) return;
+              done = true;
+              location.href = oneLinkUrl;
+            }
+            try {
+              if (navigator.clipboard && navigator.clipboard.writeText) {
+                navigator.clipboard.writeText(code).then(go, go);
+                setTimeout(go, 500);
+                return;
+              }
+            } catch (err) {}
+            go();
+          });
+        }
 
         if (!storeUrl || skipRedirect) return;
 
