@@ -1,0 +1,98 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="robots" content="noindex">
+    <title>Solgram — Opening the app</title>
+    <link rel="stylesheet" href="/styles.css">
+    <link rel="canonical" href="/claim/">
+    <style>
+      .claim {
+        min-height: 100vh;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 2rem 1.25rem;
+      }
+      .claim__card {
+        width: min(420px, 100%);
+        background: var(--panel);
+        border: 1px solid var(--border);
+        border-radius: 20px;
+        box-shadow: var(--shadow);
+        padding: 2rem 1.75rem;
+        text-align: center;
+      }
+      .claim__logo-big {
+        display: block;
+        width: 140px;
+        height: 140px;
+        object-fit: contain;
+        border-radius: 28px;
+        margin: 0 auto 1.75rem;
+      }
+      .claim__missing {
+        color: var(--muted);
+        font-size: 0.95rem;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="page claim">
+      <div class="claim__card">
+        <img class="claim__logo-big" src="/assets/icon_master.png" alt="Solgram">
+        <div id="claim-content">
+          <p class="claim__missing">No referral found. You can close this page.</p>
+        </div>
+      </div>
+    </div>
+
+    <script>
+      (function () {
+        // After a fresh install the app opens this page in the browser. The
+        // referral page saved the code in this same browser before sending the
+        // user to the store, so read it back and hand it to the app through the
+        // verified App/Universal Link on /referral. noredirect=1 keeps the
+        // referral page from bouncing to the store if the app does not take
+        // the link; claim=1 lets the app tell where the code came from.
+        var KEY = "solgram_ref";
+        var TTL_MS = 7 * 24 * 60 * 60 * 1000;
+        var CODE_RE = /^SG[A-Z0-9]{1,18}$/;
+        var REDIRECT_DELAY_MS = 300;
+
+        function readLocal() {
+          try {
+            var raw = localStorage.getItem(KEY);
+            return raw ? JSON.parse(raw) : null;
+          } catch (e) {
+            return null;
+          }
+        }
+
+        function readCookie() {
+          var m = /(?:^|; )solgram_ref=([^;]*)/.exec(document.cookie || "");
+          // The cookie carries no timestamp; its own max-age enforces the TTL.
+          return m ? { code: decodeURIComponent(m[1]), ts: Date.now() } : null;
+        }
+
+        var saved = readLocal() || readCookie();
+        var code = saved && typeof saved.code === "string" ? saved.code.toUpperCase() : "";
+        var fresh = saved && typeof saved.ts === "number" && Date.now() - saved.ts <= TTL_MS;
+        if (!fresh || !CODE_RE.test(code)) return;
+
+        var enc = encodeURIComponent(code);
+        var appUrl =
+          "https://solgram.world/referral/?referral_code=" + enc +
+          "&deep_link_sub1=" + enc + "&claim=1&noredirect=1";
+
+        document.getElementById("claim-content").innerHTML =
+          '<a class="btn" href="' + appUrl + '">Open Solgram →</a>';
+
+        setTimeout(function () {
+          location.replace(appUrl);
+        }, REDIRECT_DELAY_MS);
+      })();
+    </script>
+  </body>
+</html>
