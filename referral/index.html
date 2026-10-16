@@ -142,7 +142,19 @@
             playUrl = null;
           }
         }
-        var targetUrl = playUrl || oneLinkUrl;
+        // iPhone: a Singular link whose _dl/_ddl are the first-party referral link
+        // (assets/play-referrer.js). A missing helper or a code that fails its checks
+        // leaves singularUrl null, and iPhone keeps the OneLink.
+        var singularUrl = null;
+        if (isIOS && window.solgramPlayReferrer) {
+          try {
+            var S = window.solgramPlayReferrer;
+            singularUrl = S.singularUrlFor(S.referralDestination(code), code);
+          } catch (err) {
+            singularUrl = null;
+          }
+        }
+        var targetUrl = playUrl || singularUrl || oneLinkUrl;
         var storeUrl = isAndroid ? targetUrl : null;
         var skipRedirect = getParam("noredirect") === "1";
 
@@ -157,7 +169,7 @@
             function go() {
               if (done) return;
               done = true;
-              location.href = oneLinkUrl;
+              location.href = targetUrl;
             }
             try {
               if (navigator.clipboard && navigator.clipboard.writeText) {

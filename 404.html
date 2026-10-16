@@ -152,7 +152,18 @@
             playUrl = null;
           }
         }
-        var targetUrl = playUrl || oneLinkUrl;
+        // iPhone: a Singular link whose _dl/_ddl are this page's own URL. If the
+        // helper is missing or the URL fails validation, iPhone keeps the OneLink.
+        var singularUrl = null;
+        if (isIOS && window.solgramPlayReferrer) {
+          try {
+            var S = window.solgramPlayReferrer;
+            singularUrl = S.singularUrlFor(S.canonicalFromLocation(location));
+          } catch (err) {
+            singularUrl = null;
+          }
+        }
+        var targetUrl = playUrl || singularUrl || oneLinkUrl;
         var storeUrl = (isAndroid || isIOS) ? targetUrl : null;
         var skipRedirect = /(?:^|[?&])noredirect=1(?:&|$)/.test(location.search);
 
