@@ -73,6 +73,7 @@
       </div>
     </div>
 
+    <script src="/assets/play-referrer.js"></script>
     <script>
       (function () {
         // GitHub Pages has no server-side router, so any URL path that isn't a
@@ -139,12 +140,25 @@
         var isIOS =
           /iPhone|iPad|iPod/i.test(ua) ||
           (navigator.platform === "MacIntel" && navigator.maxTouchPoints > 1);
-        var storeUrl = (isAndroid || isIOS) ? oneLinkUrl : null;
+        // Android installs carry this page's own URL through the Play install
+        // referrer (assets/play-referrer.js). If the helper is missing or the URL
+        // fails its checks, playUrl stays null and Android keeps the OneLink above.
+        var playUrl = null;
+        if (isAndroid && window.solgramPlayReferrer) {
+          try {
+            var R = window.solgramPlayReferrer;
+            playUrl = R.playUrlFor(R.canonicalFromLocation(location));
+          } catch (err) {
+            playUrl = null;
+          }
+        }
+        var targetUrl = playUrl || oneLinkUrl;
+        var storeUrl = (isAndroid || isIOS) ? targetUrl : null;
         var skipRedirect = /(?:^|[?&])noredirect=1(?:&|$)/.test(location.search);
 
         content.innerHTML =
           '<img class="redirect__logo-big" src="/assets/icon_master.png" alt="Solgram">' +
-          '<a class="btn" href="' + oneLinkUrl + '">Continue to Solgram →</a>';
+          '<a class="btn" href="' + targetUrl + '">Continue to Solgram →</a>';
 
         if (!storeUrl || skipRedirect) return;
 
