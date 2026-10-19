@@ -72,6 +72,7 @@
       </div>
     </div>
 
+    <script src="/assets/play-referrer.js"></script>
     <script>
       (function () {
         var ONELINK_URL = "https://solgram.onelink.me/kyZR/referral2026";
@@ -129,12 +130,37 @@
         // clipboard for the app to read on first launch. Safari only allows a
         // clipboard write from a tap, so iOS is not auto-redirected: the
         // button copies the code, then continues. Android auto-redirects as before.
-        var storeUrl = isAndroid ? oneLinkUrl : null;
+        // Android carries the referral link through the Play install referrer
+        // (assets/play-referrer.js). A missing helper or a code that fails its
+        // checks leaves playUrl null, and Android keeps the OneLink above.
+        var playUrl = null;
+        if (isAndroid && window.solgramPlayReferrer) {
+          try {
+            var R = window.solgramPlayReferrer;
+            playUrl = R.playUrlFor(R.referralDestination(code));
+          } catch (err) {
+            playUrl = null;
+          }
+        }
+        // iPhone: a Singular link whose _dl/_ddl are the first-party referral link
+        // (assets/play-referrer.js). A missing helper or a code that fails its checks
+        // leaves singularUrl null, and iPhone keeps the OneLink.
+        var singularUrl = null;
+        if (isIOS && window.solgramPlayReferrer) {
+          try {
+            var S = window.solgramPlayReferrer;
+            singularUrl = S.singularUrlFor(S.referralDestination(code), code);
+          } catch (err) {
+            singularUrl = null;
+          }
+        }
+        var targetUrl = playUrl || singularUrl || oneLinkUrl;
+        var storeUrl = isAndroid ? targetUrl : null;
         var skipRedirect = getParam("noredirect") === "1";
 
         content.innerHTML =
           '<img class="referral__logo-big" src="/assets/icon_master.png" alt="Solgram">' +
-          '<a class="btn" id="referral-continue" href="' + oneLinkUrl + '">Continue to Solgram →</a>';
+          '<a class="btn" id="referral-continue" href="' + targetUrl + '">Continue to Solgram →</a>';
 
         if (isIOS) {
           document.getElementById("referral-continue").addEventListener("click", function (e) {
@@ -143,7 +169,7 @@
             function go() {
               if (done) return;
               done = true;
-              location.href = oneLinkUrl;
+              location.href = targetUrl;
             }
             try {
               if (navigator.clipboard && navigator.clipboard.writeText) {
