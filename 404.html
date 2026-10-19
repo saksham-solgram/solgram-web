@@ -140,22 +140,11 @@
         var isIOS =
           /iPhone|iPad|iPod/i.test(ua) ||
           (navigator.platform === "MacIntel" && navigator.maxTouchPoints > 1);
-        // Android installs carry this page's own URL through the Play install
-        // referrer (assets/play-referrer.js). If the helper is missing or the URL
-        // fails its checks, playUrl stays null and Android keeps the OneLink above.
-        var playUrl = null;
-        if (isAndroid && window.solgramPlayReferrer) {
-          try {
-            var R = window.solgramPlayReferrer;
-            playUrl = R.playUrlFor(R.canonicalFromLocation(location));
-          } catch (err) {
-            playUrl = null;
-          }
-        }
-        // iPhone: a Singular link whose _dl/_ddl are this page's own URL. If the
-        // helper is missing or the URL fails validation, iPhone keeps the OneLink.
+        // Both platforms go through a Singular link whose _dl/_ddl are this
+        // page's own URL (assets/play-referrer.js). If the helper is missing or
+        // the URL fails validation, singularUrl stays null and falls through.
         var singularUrl = null;
-        if (isIOS && window.solgramPlayReferrer) {
+        if ((isIOS || isAndroid) && window.solgramPlayReferrer) {
           try {
             var S = window.solgramPlayReferrer;
             singularUrl = S.singularUrlFor(S.canonicalFromLocation(location));
@@ -163,7 +152,18 @@
             singularUrl = null;
           }
         }
-        var targetUrl = playUrl || singularUrl || oneLinkUrl;
+        // Android fallback: the Play install referrer, used only when the
+        // Singular link above could not be built.
+        var playUrl = null;
+        if (isAndroid && !singularUrl && window.solgramPlayReferrer) {
+          try {
+            var R = window.solgramPlayReferrer;
+            playUrl = R.playUrlFor(R.canonicalFromLocation(location));
+          } catch (err) {
+            playUrl = null;
+          }
+        }
+        var targetUrl = singularUrl || playUrl || oneLinkUrl;
         var storeUrl = (isAndroid || isIOS) ? targetUrl : null;
         var skipRedirect = /(?:^|[?&])noredirect=1(?:&|$)/.test(location.search);
 
