@@ -136,10 +136,13 @@ const ANDROID = "Mozilla/5.0 (Linux; Android 14; Pixel 8) AppleWebKit/537.36 Chr
 const IPHONE = "Mozilla/5.0 (iPhone; CPU iPhone OS 17_0 like Mac OS X) AppleWebKit/605.1.15 Mobile/15E148";
 const DESKTOP = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) Chrome/120 Safari/537.36";
 
-test("404 page: Android product link goes to Play with the page URL as dl", () => {
+test("404 page: Android product link goes to the Singular link with the page URL as dl", () => {
   const r = runPage("404.html", { ua: ANDROID, pathname: "/product/SKU-1", search: "" });
   assert.strictEqual(r.replaced.length, 1);
-  assert.strictEqual(decodeTwice(r.replaced[0]), "https://solgram.world/product/SKU-1");
+  const parsed = new URL(r.replaced[0]);
+  assert.strictEqual(parsed.origin + parsed.pathname, "https://solgram.sng.link/D6ktt/dxit");
+  assert.strictEqual(parsed.searchParams.get("_dl"), "https://solgram.world/product/SKU-1");
+  assert.strictEqual(parsed.searchParams.get("_ddl"), "https://solgram.world/product/SKU-1");
   assert.ok(r.html.includes('href="' + r.replaced[0] + '"'));
 });
 
@@ -147,7 +150,10 @@ test("404 page: every supported path type works on Android", () => {
   for (const p of ["/category/C1", "/category/C1/S1", "/subcategory/S1", "/screen/diwali", "/order/SOLG-123", "/cart"]) {
     const r = runPage("404.html", { ua: ANDROID, pathname: p, search: "" });
     assert.strictEqual(r.replaced.length, 1, p);
-    assert.strictEqual(decodeTwice(r.replaced[0]), "https://solgram.world" + p, p);
+    const parsed = new URL(r.replaced[0]);
+    assert.strictEqual(parsed.origin + parsed.pathname, "https://solgram.sng.link/D6ktt/dxit", p);
+    assert.strictEqual(parsed.searchParams.get("_dl"), "https://solgram.world" + p, p);
+    assert.strictEqual(parsed.searchParams.get("_ddl"), "https://solgram.world" + p, p);
   }
 });
 
@@ -174,21 +180,24 @@ test("404 page: unknown path stays a plain 404 and noredirect still stops the re
   assert.strictEqual(nr.replaced.length, 0);
 });
 
-test("referral page: Android gets the Play URL with the referral link as dl", () => {
+test("referral page: Android gets the Singular link with the referral link as dl", () => {
   const r = runPage("referral/index.html", { ua: ANDROID, pathname: "/referral/", search: "?referral_code=SG1A&deep_link_sub1=SG1A" });
   assert.strictEqual(r.replaced.length, 1);
-  assert.strictEqual(
-    decodeTwice(r.replaced[0]),
-    "https://solgram.world/referral?referral_code=SG1A&deep_link_sub1=SG1A",
-  );
+  const parsed = new URL(r.replaced[0]);
+  assert.strictEqual(parsed.origin + parsed.pathname, "https://solgram.sng.link/D6ktt/dxit");
+  const dest = "https://solgram.world/referral?referral_code=SG1A&deep_link_sub1=SG1A";
+  assert.strictEqual(parsed.searchParams.get("_dl"), dest);
+  assert.strictEqual(parsed.searchParams.get("_ddl"), dest);
+  assert.strictEqual(parsed.searchParams.get("referral_code"), "SG1A");
+  assert.strictEqual(parsed.searchParams.get("deep_link_sub1"), "SG1A");
 });
 
 test("referral page: only one of the two params still yields both in dl", () => {
   const r = runPage("referral/index.html", { ua: ANDROID, pathname: "/referral/", search: "?deep_link_sub1=SG9" });
-  assert.strictEqual(
-    decodeTwice(r.replaced[0]),
-    "https://solgram.world/referral?referral_code=SG9&deep_link_sub1=SG9",
-  );
+  const parsed = new URL(r.replaced[0]);
+  const dest = "https://solgram.world/referral?referral_code=SG9&deep_link_sub1=SG9";
+  assert.strictEqual(parsed.searchParams.get("_dl"), dest);
+  assert.strictEqual(parsed.searchParams.get("_ddl"), dest);
 });
 
 test("referral page: invalid code on Android keeps the OneLink", () => {
@@ -271,10 +280,38 @@ test("404 page: iPhone keeps the OneLink when the URL is invalid or the helper i
   assert.ok(noHelper.replaced[0].startsWith(ONELINK + "?deep_link_sub3=product"));
 });
 
-test("404 page: Android is never sent to the Singular link", () => {
+test("404 page: Android is sent through the Singular link, not the bare Play referrer", () => {
   const r = runPage("404.html", { ua: ANDROID, pathname: "/product/NSDRI016", search: "" });
-  assert.ok(r.replaced[0].startsWith("https://play.google.com/"));
-  assert.ok(!r.html.includes("sng.link"));
+  assert.ok(r.replaced[0].startsWith("https://solgram.sng.link/"));
+  assert.ok(!r.html.includes("play.google.com"));
+});
+
+test("404 page: Android falls back to the Play referrer when only the Singular builder fails", () => {
+  const stub = Object.assign({}, R, { singularUrlFor: () => null });
+  const html = fs.readFileSync(path.join(ROOT, "404.html"), "utf8");
+  const scripts = [...html.matchAll(/<script>([\s\S]*?)<\/script>/g)].map((m) => m[1]);
+  const content = { innerHTML: "" };
+  const logo = { style: {} };
+  const replaced = [];
+  const timers = [];
+  const location = { pathname: "/product/SKU-1", search: "", hostname: "solgram.world", replace: (u) => replaced.push(u), href: "" };
+  const window = { solgramPlayReferrer: stub };
+  const sandbox = {
+    window,
+    location,
+    document: { getElementById: (id) => (id.endsWith("-logo") ? logo : id.endsWith("content") ? content : { addEventListener() {} }) },
+    navigator: { userAgent: ANDROID, vendor: "", platform: "Linux armv8l", maxTouchPoints: 0 },
+    setTimeout: (fn) => timers.push(fn),
+    decodeURIComponent,
+    encodeURIComponent,
+    RegExp,
+    console,
+  };
+  vm.createContext(sandbox);
+  vm.runInContext(scripts[0], sandbox);
+  timers.forEach((fn) => fn());
+  assert.ok(replaced[0].startsWith("https://play.google.com/"));
+  assert.strictEqual(decodeTwice(replaced[0]), "https://solgram.world/product/SKU-1");
 });
 
 test("referral page: iPhone button points at the Singular referral link and does not auto-redirect", () => {
@@ -291,8 +328,45 @@ test("referral page: iPhone with a bad code or no helper keeps today's OneLink b
   assert.ok(noHelper.html.includes(ONELINK + "?referral_code=SG9EA"));
 });
 
-test("referral page: Android still gets the Play URL, not the Singular link", () => {
+test("referral page: Android is sent through the Singular referral link, not the bare Play URL", () => {
   const r = runPage("referral/index.html", { ua: ANDROID, pathname: "/referral/", search: "?referral_code=SG9EA&deep_link_sub1=SG9EA" });
-  assert.ok(r.replaced[0].startsWith("https://play.google.com/"));
-  assert.ok(!r.html.includes("sng.link"));
+  assert.strictEqual(r.replaced[0], SINGULAR_REFERRAL);
+  assert.ok(!r.html.includes("play.google.com"));
+});
+
+test("referral page: Android falls back to the Play referrer when only the Singular builder fails", () => {
+  const stub = Object.assign({}, R, { singularUrlFor: () => null });
+  const html = fs.readFileSync(path.join(ROOT, "referral/index.html"), "utf8");
+  const scripts = [...html.matchAll(/<script>([\s\S]*?)<\/script>/g)].map((m) => m[1]);
+  const content = { innerHTML: "" };
+  const logo = { style: {} };
+  const replaced = [];
+  const timers = [];
+  const location = {
+    pathname: "/referral/",
+    search: "?referral_code=SG9EA&deep_link_sub1=SG9EA",
+    hostname: "solgram.world",
+    replace: (u) => replaced.push(u),
+    href: "",
+  };
+  const window = { solgramPlayReferrer: stub };
+  const sandbox = {
+    window,
+    location,
+    document: { getElementById: (id) => (id.endsWith("-logo") ? logo : id.endsWith("content") ? content : { addEventListener() {} }) },
+    navigator: { userAgent: ANDROID, vendor: "", platform: "Linux armv8l", maxTouchPoints: 0 },
+    setTimeout: (fn) => timers.push(fn),
+    decodeURIComponent,
+    encodeURIComponent,
+    RegExp,
+    console,
+  };
+  vm.createContext(sandbox);
+  vm.runInContext(scripts[0], sandbox);
+  timers.forEach((fn) => fn());
+  assert.ok(replaced[0].startsWith("https://play.google.com/"));
+  assert.strictEqual(
+    decodeTwice(replaced[0]),
+    "https://solgram.world/referral?referral_code=SG9EA&deep_link_sub1=SG9EA",
+  );
 });
