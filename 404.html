@@ -99,6 +99,7 @@
           // category code rides along in deep_link_sub4 (see below).
           { type: "subcategory", regex: /^\/category\/([^/]+)\/([^/]+)\/?$/, label: "subcategory", codeIndex: 2, categoryIndex: 1 },
           { type: "screen", regex: /^\/screen\/([^/]+)\/?$/, label: "screen" },
+          { type: "banner", regex: /^\/banner\/([^/]+)\/?$/, label: "banner" },
           { type: "order", regex: /^\/order\/([^/]+)\/?$/, label: "order" },
           // Cart is per-user, so the code segment is optional (/cart or /cart/<id>).
           { type: "cart", regex: /^\/cart(?:\/([^/]+))?\/?$/, label: "cart" },
