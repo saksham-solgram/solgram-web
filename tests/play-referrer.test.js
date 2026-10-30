@@ -147,7 +147,7 @@ test("404 page: Android product link goes to the Singular link with the page URL
 });
 
 test("404 page: every supported path type works on Android", () => {
-  for (const p of ["/category/C1", "/category/C1/S1", "/subcategory/S1", "/screen/diwali", "/order/SOLG-123", "/cart"]) {
+  for (const p of ["/category/C1", "/category/C1/S1", "/subcategory/S1", "/screen/diwali", "/order/SOLG-123", "/cart", "/banner/Snackedit"]) {
     const r = runPage("404.html", { ua: ANDROID, pathname: p, search: "" });
     assert.strictEqual(r.replaced.length, 1, p);
     const parsed = new URL(r.replaced[0]);
@@ -178,6 +178,39 @@ test("404 page: unknown path stays a plain 404 and noredirect still stops the re
   assert.strictEqual(nf.replaced.length, 0);
   const nr = runPage("404.html", { ua: ANDROID, pathname: "/product/SKU-1", search: "?noredirect=1" });
   assert.strictEqual(nr.replaced.length, 0);
+});
+
+test("404 page: /banner/ with no title, and /banner/a/b, stay a plain 404", () => {
+  for (const p of ["/banner/", "/banner", "/banner/a/b"]) {
+    const r = runPage("404.html", { ua: ANDROID, pathname: p, search: "" });
+    assert.strictEqual(r.replaced.length, 0, p);
+    assert.strictEqual(r.html, "", p);
+  }
+});
+
+test("404 page: /banner/<plain or mixed-case title> goes through the Singular link with the title intact", () => {
+  for (const title of ["Snackedit", "SnAcKeDiT"]) {
+    const r = runPage("404.html", { ua: ANDROID, pathname: "/banner/" + title, search: "" });
+    assert.strictEqual(r.replaced.length, 1, title);
+    const parsed = new URL(r.replaced[0]);
+    assert.strictEqual(parsed.origin + parsed.pathname, "https://solgram.sng.link/D6ktt/dxit", title);
+    assert.strictEqual(parsed.searchParams.get("_dl"), "https://solgram.world/banner/" + title, title);
+  }
+});
+
+// A URL-encoded space decodes to a literal space, which the destination
+// rules reject (see "rejects whitespace, control characters and encoded
+// ones" above) — same as any other route type. That's not a banner-specific
+// bug: it falls through to the OneLink fallback, which decodes/re-encodes
+// the title itself and keeps the space intact there.
+test("404 page: /banner/<title with an encoded space> falls back to OneLink with the title intact", () => {
+  const r = runPage("404.html", { ua: ANDROID, pathname: "/banner/Snack%20Edit", search: "" });
+  assert.strictEqual(r.replaced.length, 1);
+  assert.ok(r.replaced[0].startsWith(ONELINK));
+  const parsed = new URL(r.replaced[0]);
+  assert.strictEqual(parsed.searchParams.get("deep_link_sub3"), "banner");
+  assert.strictEqual(parsed.searchParams.get("deep_link_sub2"), "Snack Edit");
+  assert.strictEqual(parsed.searchParams.get("deep_link_value"), "Snack Edit");
 });
 
 test("referral page: Android gets the Singular link with the referral link as dl", () => {
@@ -263,7 +296,7 @@ test("singularUrlFor rejects a bad referral code instead of dropping it", () => 
 });
 
 test("404 page: iPhone gets the Singular link for every supported path type", () => {
-  for (const p of ["/product/SKU-1", "/category/C1", "/category/C1/S1", "/subcategory/S1", "/screen/diwali", "/order/SOLG-123", "/cart"]) {
+  for (const p of ["/product/SKU-1", "/category/C1", "/category/C1/S1", "/subcategory/S1", "/screen/diwali", "/order/SOLG-123", "/cart", "/banner/Snackedit"]) {
     const r = runPage("404.html", { ua: IPHONE, platform: "iPhone", pathname: p, search: "" });
     assert.strictEqual(r.replaced.length, 1, p);
     const parsed = new URL(r.replaced[0]);
