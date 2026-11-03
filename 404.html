@@ -103,6 +103,8 @@
           { type: "order", regex: /^\/order\/([^/]+)\/?$/, label: "order" },
           // Cart is per-user, so the code segment is optional (/cart or /cart/<id>).
           { type: "cart", regex: /^\/cart(?:\/([^/]+))?\/?$/, label: "cart" },
+          // No code segment — opens the Home tab, nothing more specific.
+          { type: "home", regex: /^\/home-page\/?$/, label: "home" },
         ];
 
         var route, match;
