@@ -147,7 +147,7 @@ test("404 page: Android product link goes to the Singular link with the page URL
 });
 
 test("404 page: every supported path type works on Android", () => {
-  for (const p of ["/category/C1", "/category/C1/S1", "/subcategory/S1", "/screen/diwali", "/order/SOLG-123", "/cart", "/banner/Snackedit"]) {
+  for (const p of ["/category/C1", "/category/C1/S1", "/subcategory/S1", "/screen/diwali", "/order/SOLG-123", "/cart", "/banner/Snackedit", "/home-page", "/gift-hamper"]) {
     const r = runPage("404.html", { ua: ANDROID, pathname: p, search: "" });
     assert.strictEqual(r.replaced.length, 1, p);
     const parsed = new URL(r.replaced[0]);
@@ -211,6 +211,20 @@ test("404 page: /banner/<title with an encoded space> falls back to OneLink with
   assert.strictEqual(parsed.searchParams.get("deep_link_sub3"), "banner");
   assert.strictEqual(parsed.searchParams.get("deep_link_sub2"), "Snack Edit");
   assert.strictEqual(parsed.searchParams.get("deep_link_value"), "Snack Edit");
+});
+
+test("404 page: /gift-hamper/extra, with a trailing segment, stays a plain 404", () => {
+  const r = runPage("404.html", { ua: ANDROID, pathname: "/gift-hamper/extra", search: "" });
+  assert.strictEqual(r.replaced.length, 0);
+  assert.strictEqual(r.html, "");
+});
+
+test("404 page: /gift-hamper falls back to OneLink with deep_link_sub3=gift-hamper when the helper is missing", () => {
+  const r = runPage("404.html", { ua: ANDROID, pathname: "/gift-hamper", search: "", helper: false });
+  assert.strictEqual(r.replaced.length, 1);
+  assert.ok(r.replaced[0].startsWith(ONELINK));
+  const parsed = new URL(r.replaced[0]);
+  assert.strictEqual(parsed.searchParams.get("deep_link_sub3"), "gift-hamper");
 });
 
 test("referral page: Android gets the Singular link with the referral link as dl", () => {
@@ -296,7 +310,7 @@ test("singularUrlFor rejects a bad referral code instead of dropping it", () => 
 });
 
 test("404 page: iPhone gets the Singular link for every supported path type", () => {
-  for (const p of ["/product/SKU-1", "/category/C1", "/category/C1/S1", "/subcategory/S1", "/screen/diwali", "/order/SOLG-123", "/cart", "/banner/Snackedit"]) {
+  for (const p of ["/product/SKU-1", "/category/C1", "/category/C1/S1", "/subcategory/S1", "/screen/diwali", "/order/SOLG-123", "/cart", "/banner/Snackedit", "/home-page", "/gift-hamper"]) {
     const r = runPage("404.html", { ua: IPHONE, platform: "iPhone", pathname: p, search: "" });
     assert.strictEqual(r.replaced.length, 1, p);
     const parsed = new URL(r.replaced[0]);
