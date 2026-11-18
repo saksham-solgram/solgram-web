@@ -17,7 +17,7 @@
   var PLAY_URL = "https://play.google.com/store/apps/details?id=world.solgram.customer";
   // Created in Singular (source "Referral (Custom)"). Kept exactly as issued,
   // including _smtype=3; it already has a "?", so every extra parameter joins with "&".
-  var SINGULAR_BASE_URL = "https://solgram.sng.link/D6ktt/dxit?_smtype=3";
+  var SINGULAR_BASE_URL = "https://solgram.sng.link/E6ktt/tvcx?_smtype=3";
   var MAX_LENGTH = 512;
   var CODE_RE = /^[A-Za-z0-9_-]{2,32}$/;
 

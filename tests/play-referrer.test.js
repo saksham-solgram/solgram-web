@@ -95,11 +95,11 @@ test("www host is rejected end to end (falls back to OneLink)", () => {
 // ---- run the real inline page scripts against stubs ----
 
 const ONELINK = "https://solgram.onelink.me/kyZR/referral2026";
-const SINGULAR_BASE = "https://solgram.sng.link/D6ktt/dxit?_smtype=3";
+const SINGULAR_BASE = "https://solgram.sng.link/E6ktt/tvcx?_smtype=3";
 const SINGULAR_PRODUCT =
-  "https://solgram.sng.link/D6ktt/dxit?_smtype=3&_dl=https%3A%2F%2Fsolgram.world%2Fproduct%2FNSDRI016&_ddl=https%3A%2F%2Fsolgram.world%2Fproduct%2FNSDRI016";
+  "https://solgram.sng.link/E6ktt/tvcx?_smtype=3&_dl=https%3A%2F%2Fsolgram.world%2Fproduct%2FNSDRI016&_ddl=https%3A%2F%2Fsolgram.world%2Fproduct%2FNSDRI016";
 const SINGULAR_REFERRAL =
-  "https://solgram.sng.link/D6ktt/dxit?_smtype=3&_dl=https%3A%2F%2Fsolgram.world%2Freferral%3Freferral_code%3DSG9EA%26deep_link_sub1%3DSG9EA&_ddl=https%3A%2F%2Fsolgram.world%2Freferral%3Freferral_code%3DSG9EA%26deep_link_sub1%3DSG9EA&referral_code=SG9EA&deep_link_sub1=SG9EA";
+  "https://solgram.sng.link/E6ktt/tvcx?_smtype=3&_dl=https%3A%2F%2Fsolgram.world%2Freferral%3Freferral_code%3DSG9EA%26deep_link_sub1%3DSG9EA&_ddl=https%3A%2F%2Fsolgram.world%2Freferral%3Freferral_code%3DSG9EA%26deep_link_sub1%3DSG9EA&referral_code=SG9EA&deep_link_sub1=SG9EA";
 
 const runPage = (file, { ua, platform = "Linux armv8l", pathname, search, helper = true }) => {
   const html = fs.readFileSync(path.join(ROOT, file), "utf8");
@@ -140,7 +140,7 @@ test("404 page: Android product link goes to the Singular link with the page URL
   const r = runPage("404.html", { ua: ANDROID, pathname: "/product/SKU-1", search: "" });
   assert.strictEqual(r.replaced.length, 1);
   const parsed = new URL(r.replaced[0]);
-  assert.strictEqual(parsed.origin + parsed.pathname, "https://solgram.sng.link/D6ktt/dxit");
+  assert.strictEqual(parsed.origin + parsed.pathname, "https://solgram.sng.link/E6ktt/tvcx");
   assert.strictEqual(parsed.searchParams.get("_dl"), "https://solgram.world/product/SKU-1");
   assert.strictEqual(parsed.searchParams.get("_ddl"), "https://solgram.world/product/SKU-1");
   assert.ok(r.html.includes('href="' + r.replaced[0] + '"'));
@@ -151,7 +151,7 @@ test("404 page: every supported path type works on Android", () => {
     const r = runPage("404.html", { ua: ANDROID, pathname: p, search: "" });
     assert.strictEqual(r.replaced.length, 1, p);
     const parsed = new URL(r.replaced[0]);
-    assert.strictEqual(parsed.origin + parsed.pathname, "https://solgram.sng.link/D6ktt/dxit", p);
+    assert.strictEqual(parsed.origin + parsed.pathname, "https://solgram.sng.link/E6ktt/tvcx", p);
     assert.strictEqual(parsed.searchParams.get("_dl"), "https://solgram.world" + p, p);
     assert.strictEqual(parsed.searchParams.get("_ddl"), "https://solgram.world" + p, p);
   }
@@ -193,7 +193,7 @@ test("404 page: /banner/<plain or mixed-case title> goes through the Singular li
     const r = runPage("404.html", { ua: ANDROID, pathname: "/banner/" + title, search: "" });
     assert.strictEqual(r.replaced.length, 1, title);
     const parsed = new URL(r.replaced[0]);
-    assert.strictEqual(parsed.origin + parsed.pathname, "https://solgram.sng.link/D6ktt/dxit", title);
+    assert.strictEqual(parsed.origin + parsed.pathname, "https://solgram.sng.link/E6ktt/tvcx", title);
     assert.strictEqual(parsed.searchParams.get("_dl"), "https://solgram.world/banner/" + title, title);
   }
 });
@@ -231,7 +231,7 @@ test("referral page: Android gets the Singular link with the referral link as dl
   const r = runPage("referral/index.html", { ua: ANDROID, pathname: "/referral/", search: "?referral_code=SG1A&deep_link_sub1=SG1A" });
   assert.strictEqual(r.replaced.length, 1);
   const parsed = new URL(r.replaced[0]);
-  assert.strictEqual(parsed.origin + parsed.pathname, "https://solgram.sng.link/D6ktt/dxit");
+  assert.strictEqual(parsed.origin + parsed.pathname, "https://solgram.sng.link/E6ktt/tvcx");
   const dest = "https://solgram.world/referral?referral_code=SG1A&deep_link_sub1=SG1A";
   assert.strictEqual(parsed.searchParams.get("_dl"), dest);
   assert.strictEqual(parsed.searchParams.get("_ddl"), dest);
@@ -314,7 +314,7 @@ test("404 page: iPhone gets the Singular link for every supported path type", ()
     const r = runPage("404.html", { ua: IPHONE, platform: "iPhone", pathname: p, search: "" });
     assert.strictEqual(r.replaced.length, 1, p);
     const parsed = new URL(r.replaced[0]);
-    assert.strictEqual(parsed.origin + parsed.pathname, "https://solgram.sng.link/D6ktt/dxit", p);
+    assert.strictEqual(parsed.origin + parsed.pathname, "https://solgram.sng.link/E6ktt/tvcx", p);
     assert.strictEqual(parsed.searchParams.get("_dl"), "https://solgram.world" + p, p);
     assert.strictEqual(parsed.searchParams.get("_ddl"), "https://solgram.world" + p, p);
   }
